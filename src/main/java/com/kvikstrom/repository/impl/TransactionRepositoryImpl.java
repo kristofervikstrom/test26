@@ -5,13 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
 import com.kvikstrom.dto.SumDTO;
 import com.kvikstrom.dto.TransactionDTO;
+import com.kvikstrom.exceptions.DuplicateIdException;
 import com.kvikstrom.model.Transaction;
 import com.kvikstrom.repository.TransactionRepository;
 
@@ -22,7 +20,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 	private static final Map<Long, List<Transaction>> parentStore = new HashMap<Long, List<Transaction>>();
 
 	@Override
-	public HttpEntity<Void> insert(long transaction_id, TransactionDTO request) {
+	public Transaction insert(long transaction_id, TransactionDTO request) {
+		if (findById(transaction_id) != null) {
+			throw new DuplicateIdException();
+		}
 		Transaction transaction = new Transaction();
 		transaction.setTransaction_id(transaction_id);
 		transaction.setAmount(request.getAmount());
@@ -40,7 +41,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 		
 		dataStore.put(transaction_id, transaction);
 		
-		return new ResponseEntity<>(HttpStatus.OK);
+		return transaction;
 	}
 
 	@Override

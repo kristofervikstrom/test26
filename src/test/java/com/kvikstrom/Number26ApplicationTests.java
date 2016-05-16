@@ -135,5 +135,22 @@ public class Number26ApplicationTests {
 		assertThat(response.getStatusCode(), is(equalTo(HttpStatus.BAD_REQUEST)));
 
 	}
+	
+	@Test
+	public void testDuplicateId() {
+		TransactionDTO transaction1 = new TransactionDTO();
+		transaction1.setAmount(5000);
+		transaction1.setType("shopping");
+		this.repository.insert(9L, transaction1);
+		
+		TransactionDTO request = new TransactionDTO();
+		request.setAmount(1000);
+		request.setType("computer");
+		
+		RestTemplate template = new TestRestTemplate();
+		ResponseEntity<Void> response = template.exchange(this.getUrl() + "/transactionservice/transaction/9",
+				HttpMethod.PUT, new HttpEntity<>(request), Void.class);
+		assertThat(response.getStatusCode(), is(equalTo(HttpStatus.CONFLICT)));
+	}
 
 }

@@ -18,7 +18,7 @@ import com.kvikstrom.dto.TransactionDTO;
 import com.kvikstrom.exceptions.BadDataException;
 import com.kvikstrom.exceptions.EntityNotFoundException;
 import com.kvikstrom.model.Transaction;
-import com.kvikstrom.service.TransactionService;
+import com.kvikstrom.repository.TransactionRepository;
 
 
 @RestController
@@ -26,7 +26,7 @@ import com.kvikstrom.service.TransactionService;
 public class TransactionController {
 	
 	@Autowired
-	private TransactionService transactionService;
+	private TransactionRepository repository;
 	
 	@RequestMapping(value = "/transaction/{transaction_id:[0-9]+}", method = RequestMethod.PUT)
 	public HttpEntity<Void> insertTransaction(
@@ -37,14 +37,14 @@ public class TransactionController {
 				|| request.getType().isEmpty()) {
 			throw new BadDataException();
 		}
-		this.transactionService.insertTransaction(transaction_id, request);
+		this.repository.insert(transaction_id, request);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/transaction/{transaction_id:[0-9]+}", method = RequestMethod.GET)
 	@ResponseBody
 	public Transaction getTransaction(@PathVariable Long transaction_id) {
-		Transaction transaction = this.transactionService.getTransaction(transaction_id);
+		Transaction transaction = this.repository.findById(transaction_id);
 		if (transaction == null) {
 			throw new EntityNotFoundException();
 		}
@@ -54,14 +54,14 @@ public class TransactionController {
 	@RequestMapping(value = "/types/{type}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public List<Long> getTransactionsByType(@PathVariable String type) {
-		return this.transactionService.getTransactionByType(type);
+		return this.repository.findByType(type);
 		
 	}
 	
 	@RequestMapping(value = "/sum/{transaction_id:[0-9]+}", method = RequestMethod.GET)
 	@ResponseBody
 	public SumDTO getSum(@PathVariable Long transaction_id) {
-		return this.transactionService.getSum(transaction_id);
+		return this.repository.sum(transaction_id);
 	}
 	
 
